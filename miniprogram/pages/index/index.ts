@@ -1,135 +1,54 @@
+// index.ts
+// 获取应用实例
 const app = getApp<IAppOption>()
+const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
 
-Page({
+Component({
   data: {
-    stats: {
-      totalMaterials: 0,
-      availableMaterials: 0,
-      audioMaterials: 0
+    motto: 'Hello World',
+    userInfo: {
+      avatarUrl: defaultAvatarUrl,
+      nickName: '',
     },
-    platforms: [
-      { id: 'pinterest', name: 'Pinterest' },
-      { id: 'unsplash', name: 'Unsplash' },
-      { id: 'pexels', name: 'Pexels' },
-      { id: 'pixabay', name: 'Pixabay' }
-    ],
-    videoStyles: [
-      { id: 'vlog', name: 'Vlog风格' },
-      { id: 'cinematic', name: '电影感' },
-      { id: 'minimal', name: '极简风' },
-      { id: 'dynamic', name: '动感节奏' },
-      { id: 'warm', name: '温暖治愈' }
-    ],
-    selectedPlatformIndex: -1,
-    selectedPlatform: '',
-    selectedStyleIndex: -1,
-    selectedStyle: '',
-    updating: false,
-    generating: false
+    hasUserInfo: false,
+    canIUseGetUserProfile: wx.canIUse('getUserProfile'),
+    canIUseNicknameComp: wx.canIUse('input.type.nickname'),
   },
-
-  onLoad() {
-    this.loadStats()
-  },
-
-  onShow() {
-    this.loadStats()
-  },
-
-  loadStats() {
-    const stats = app.globalData.stats
-    this.setData({ stats })
-  },
-
-  onPlatformChange(e: any) {
-    const index = e.detail.value
-    const platform = this.data.platforms[index]
-    this.setData({
-      selectedPlatformIndex: index,
-      selectedPlatform: platform.name
-    })
-  },
-
-  onStyleChange(e: any) {
-    const index = e.detail.value
-    const style = this.data.videoStyles[index]
-    this.setData({
-      selectedStyleIndex: index,
-      selectedStyle: style.name
-    })
-  },
-
-  onUpdateMaterial() {
-    if (!this.data.selectedPlatform) {
-      wx.showToast({ title: '请选择更新平台', icon: 'none' })
-      return
-    }
-    this.setData({ updating: true })
-    wx.showLoading({ title: '更新中...' })
-
-    setTimeout(() => {
-      const newMaterials = [
-        { id: Date.now().toString(), type: 'image' as const, url: `https://picsum.photos/400/300?random=${Date.now()}`, title: `${this.data.selectedPlatform}素材`, tags: ['新素材'], source: this.data.selectedPlatform, status: 'available' as const, createdAt: Date.now() }
-      ]
-      const materials = wx.getStorageSync('materials') || []
-      materials.unshift(...newMaterials)
-      wx.setStorageSync('materials', materials)
-      app.globalData.materials = materials
-      app.updateStats()
-      app.addLog('material-update', 'success', `从 ${this.data.selectedPlatform} 更新了素材`, { count: newMaterials.length })
-
-      this.setData({
-        updating: false,
-        stats: app.globalData.stats
+  methods: {
+    // 事件处理函数
+    bindViewTap() {
+      wx.navigateTo({
+        url: '../logs/logs',
       })
-      wx.hideLoading()
-      wx.showToast({ title: '更新成功', icon: 'success' })
-    }, 2000)
+    },
+    onChooseAvatar(e: any) {
+      const { avatarUrl } = e.detail
+      const { nickName } = this.data.userInfo
+      this.setData({
+        "userInfo.avatarUrl": avatarUrl,
+        hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
+      })
+    },
+    onInputChange(e: any) {
+      const nickName = e.detail.value
+      const { avatarUrl } = this.data.userInfo
+      this.setData({
+        "userInfo.nickName": nickName,
+        hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
+      })
+    },
+    getUserProfile() {
+      // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
+      wx.getUserProfile({
+        desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+        success: (res) => {
+          console.log(res)
+          this.setData({
+            userInfo: res.userInfo,
+            hasUserInfo: true
+          })
+        }
+      })
+    },
   },
-
-  onGenerateVideo(e: any) {
-    const type = e.currentTarget.dataset.type
-    if (!this.data.selectedStyle) {
-      wx.showToast({ title: '请选择视频风格', icon: 'none' })
-      return
-    }
-    this.setData({ generating: true })
-    wx.showLoading({ title: '生成中...' })
-
-    setTimeout(() => {
-      const task = {
-        id: Date.now().toString(),
-        style: this.data.selectedStyle,
-        type: type as 'no-narration' | 'with-narration',
-        materials: [],
-        status: 'completed' as const,
-        progress: 100,
-        outputUrl: `https://picsum.photos/400/300?random=${Date.now()}`,
-        createdAt: Date.now(),
-        completedAt: Date.now()
-      }
-      const tasks = wx.getStorageSync('videoTasks') || []
-      tasks.unshift(task)
-      wx.setStorageSync('videoTasks', tasks)
-      app.globalData.videoTasks = tasks
-      app.addLog('video-generate', 'success', `生成${type === 'no-narration' ? '无解说' : '带解说'}视频：${this.data.selectedStyle}`, { taskId: task.id })
-
-      this.setData({ generating: false })
-      wx.hideLoading()
-      wx.showToast({ title: '生成成功', icon: 'success' })
-
-      wx.navigateTo({ url: '/pages/video/video' })
-    }, 3000)
-  },
-
-  navigateTo(e: any) {
-    const page = e.currentTarget.dataset.page
-    const urlMap: Record<string, string> = {
-      crawler: '/pages/crawler/crawler',
-      material: '/pages/material/material',
-      video: '/pages/video/video',
-      upload: '/pages/upload/upload'
-    }
-    wx.navigateTo({ url: urlMap[page] })
-  }
 })

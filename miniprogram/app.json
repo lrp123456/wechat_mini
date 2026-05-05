@@ -1,16 +1,11 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/crawler/crawler",
-    "pages/material/material",
-    "pages/video/video",
-    "pages/upload/upload",
     "pages/logs/logs"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationStyle": "custom",
-    "backgroundColor": "#E8F4FD"
+    "navigationStyle": "custom"
   },
   "style": "v2",
   "rendererOptions": {
@@ -25,31 +20,5 @@
   },
   "componentFramework": "glass-easel",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents",
-  "tabBar": {
-    "color": "#5F6368",
-    "selectedColor": "#1A73E8",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "white",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "images/tabbar/home.png",
-        "selectedIconPath": "images/tabbar/home-active.png"
-      },
-      {
-        "pagePath": "pages/material/material",
-        "text": "素材库",
-        "iconPath": "images/tabbar/material.png",
-        "selectedIconPath": "images/tabbar/material-active.png"
-      },
-      {
-        "pagePath": "pages/logs/logs",
-        "text": "日志",
-        "iconPath": "images/tabbar/logs.png",
-        "selectedIconPath": "images/tabbar/logs-active.png"
-      }
-    ]
-  }
+  "lazyCodeLoading": "requiredComponents"
 }
