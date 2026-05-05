@@ -72,9 +72,9 @@ Page({
         const platform = this.data.platforms.find(pl => pl.id === p)
         return {
           id: p,
-          name: platform?.name || p,
-          status: t.results?.[p]?.status || t.status,
-          progress: t.progress?.[p] || 0
+          name: platform ? platform.name : p,
+          status: t.results && t.results[p] && t.results[p].status ? t.results[p].status : t.status,
+          progress: t.progress && t.progress[p] ? t.progress[p] : 0
         }
       })
     }))

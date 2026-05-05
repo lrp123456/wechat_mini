@@ -78,7 +78,8 @@ Page({
       return
     }
 
-    const styleName = this.data.videoStyles.find(s => s.id === this.data.selectedStyle)?.name || ''
+    const style = this.data.videoStyles.find(s => s.id === this.data.selectedStyle)
+    const styleName = style ? style.name : ''
 
     this.setData({ generating: true })
     wx.showLoading({ title: '生成中...' })
