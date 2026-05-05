@@ -1,0 +1,116 @@
+<view class="page-container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <view class="header-content">
+      <view class="avatar">
+        <image src="https://api.dicebear.com/7.x/avataaars/svg?seed=workflow" mode="aspectFill" />
+      </view>
+      <text class="header-title">视频管理</text>
+    </view>
+  </view>
+
+  <scroll-view class="scrollarea" scroll-y type="list">
+    <view class="container">
+      <!-- 视频风格选择 -->
+      <view class="card style-section">
+        <view class="section-header">
+          <view class="section-icon icon-style"></view>
+          <text class="section-title">视频风格</text>
+        </view>
+        <view class="style-grid">
+          <view class="style-item {{selectedStyle === item.id ? 'active' : ''}}" wx:for="{{videoStyles}}" wx:key="id" bindtap="selectStyle" data-id="{{item.id}}">
+            <view class="style-preview">
+              <image src="{{item.preview}}" mode="aspectFill" lazy-load />
+            </view>
+            <text class="style-name">{{item.name}}</text>
+            <text class="style-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 生成选项 -->
+      <view class="card generate-section">
+        <view class="section-header">
+          <view class="section-icon icon-generate"></view>
+          <text class="section-title">生成选项</text>
+        </view>
+        <view class="option-row">
+          <text class="option-label">视频类型</text>
+          <view class="option-segment">
+            <view class="segment-item {{videoType === 'no-narration' ? 'active' : ''}}" bindtap="setVideoType" data-type="no-narration">
+              <text>无解说</text>
+            </view>
+            <view class="segment-item {{videoType === 'with-narration' ? 'active' : ''}}" bindtap="setVideoType" data-type="with-narration">
+              <text>带解说</text>
+            </view>
+          </view>
+        </view>
+        <view class="option-row">
+          <text class="option-label">背景音乐</text>
+          <picker mode="selector" range="{{bgmOptions}}" value="{{selectedBgmIndex}}" bindchange="onBgmChange">
+            <view class="picker-value">
+              <text>{{selectedBgm || '选择背景音乐'}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+        <view class="option-row">
+          <text class="option-label">视频时长</text>
+          <view class="duration-slider">
+            <slider min="5" max="60" value="{{duration}}" step="5" show-value bindchange="onDurationChange" />
+          </view>
+        </view>
+        <view class="btn btn-primary {{generating ? 'btn-loading' : ''}}" bindtap="generateVideo">
+          <text wx:if="{{!generating}}">开始生成</text>
+          <view wx:else class="loading-dots">
+            <view class="dot"></view>
+            <view class="dot"></view>
+            <view class="dot"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 已生成视频列表 -->
+      <view class="card task-section" wx:if="{{videoTasks.length > 0}}">
+        <view class="section-header">
+          <view class="section-icon icon-tasks"></view>
+          <text class="section-title">已生成视频</text>
+        </view>
+        <view class="task-list">
+          <view class="task-item" wx:for="{{videoTasks}}" wx:key="id">
+            <view class="task-preview">
+              <image src="{{item.outputUrl || 'https://picsum.photos/400/300?random=1'}}" mode="aspectFill" />
+              <view class="task-type-badge {{item.type}}">
+                <text>{{item.type === 'no-narration' ? '无解说' : '带解说'}}</text>
+              </view>
+            </view>
+            <view class="task-info">
+              <text class="task-style">{{item.style}}</text>
+              <view class="task-status-row">
+                <view class="status-badge {{item.status}}">
+                  <text>{{item.status === 'completed' ? '已完成' : item.status === 'processing' ? '生成中' : item.status === 'failed' ? '失败' : '待处理'}}</text>
+                </view>
+                <text class="task-time">{{item.createdAtStr}}</text>
+              </view>
+              <view class="progress-bar" wx:if="{{item.status === 'processing'}}">
+                <view class="progress-fill" style="width: {{item.progress}}%"></view>
+              </view>
+            </view>
+            <view class="task-actions">
+              <view class="action-btn upload" bindtap="uploadVideo" data-id="{{item.id}}" wx:if="{{item.status === 'completed'}}">
+                <text>上传</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{videoTasks.length === 0}}">
+        <view class="empty-icon">🎬</view>
+        <text>还没有生成过视频</text>
+        <text style="font-size: 24rpx; margin-top: 8rpx;">选择风格后开始生成</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
